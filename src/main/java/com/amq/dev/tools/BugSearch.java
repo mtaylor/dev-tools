@@ -148,8 +148,10 @@ public class BugSearch {
    public boolean runTests(int searchValue) throws Exception {
       for (int i = 0; i < testIterations; i++) {
          if (!runWorkflow(searchValue, i))
+            logger.info("Test Failed: HEAD~" + searchValue + " Iteration: " + (testIterations + 1));
             return false;
       }
+      logger.info("Test Passed after " + (testIterations + 1) + "runs Commit=HEAD~" + searchValue);
       return true;
    }
 
