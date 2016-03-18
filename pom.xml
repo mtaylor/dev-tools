@@ -28,13 +28,6 @@
                <configuration>
                   <showWarnings>true</showWarnings>
                   <forceJavacCompilerUse>true</forceJavacCompilerUse>
-                  <compilerArgs>
-                     <arg>-Xep:NonAtomicVolatileUpdate:ERROR</arg>
-                     <arg>-Xep:SynchronizeOnNonFinalField:ERROR</arg>
-                     <arg>-Xep:StaticAccessedFromInstance:ERROR</arg>
-                     <arg>-Xep:SynchronizeOnNonFinalField:ERROR</arg>
-                     <arg>-Xep:WaitNotInLoop:ERROR</arg>
-                  </compilerArgs>
                </configuration>
                <dependencies>
                   <dependency>
