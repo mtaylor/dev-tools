@@ -58,7 +58,7 @@ public class BugSearch {
 
    public static final String SRC_DIR_ENV_KEY = "SRC_DIR";
 
-
+   public static final String ITERATION_VALUE_ENV_KEY = "ITERATION";
    // Algorithm Names
    public static final String BINARY_SEARCH_ALGORITHM_NAME = "Binary";
 
@@ -128,6 +128,10 @@ public class BugSearch {
          searchAlgorithm.result(result, nextValue);
          if (result) {
             lastGoodCommit = topCommit + " ~" + nextValue;
+            logger.info("Good Commit: " + lastGoodCommit);
+         }
+         else {
+            logger.info("Bad Commit: " + topCommit + " ~" + nextValue);
          }
       }
    }
@@ -147,9 +151,11 @@ public class BugSearch {
 
    public boolean runTests(int searchValue) throws Exception {
       for (int i = 0; i < testIterations; i++) {
-         if (!runWorkflow(searchValue, i))
+         boolean result = runWorkflow(searchValue, i);
+         if (!result) {
             logger.info("Test Failed: HEAD~" + searchValue + " Iteration: " + (testIterations + 1));
             return false;
+         }
       }
       logger.info("Test Passed after " + (testIterations + 1) + "runs Commit=HEAD~" + searchValue);
       return true;
@@ -158,11 +164,14 @@ public class BugSearch {
    private boolean runWorkflow(int searchValue, int iteration) throws Exception {
       RunMonitor monitor;
       boolean result = true;
+
+      environment.setProperty(SEARCH_VALUE_ENV_KEY, "" + searchValue);
+      environment.setProperty(ITERATION_VALUE_ENV_KEY, "" + iteration);
+
       for (int i = 0; i < workflow.length; i++) {
          String step = workflow[i];
-         environment.setProperty(SEARCH_VALUE_ENV_KEY, "" + searchValue);
 
-         logger.info("Running Step: " + step + " on HEAD~" + searchValue + " Iteration: " + (iteration + 1));
+         logger.info("Running Step: " + step + " on HEAD~" + searchValue + " Iteration: " + iteration);
 
          Process process = Utils.executeStep(homeDir, environment, step);
          if (step.equals("Run")) {
@@ -188,6 +197,8 @@ public class BugSearch {
       t.start();
       runMonitor.getProcess().waitFor();
       t.join();
+
+      runMonitor.getProcess().destroy();
       return runMonitor.getResult();
    }
 

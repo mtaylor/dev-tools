@@ -18,6 +18,7 @@ package com.amq.dev.tools.monitors;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,21 +52,33 @@ public class PatternMatchFailBugMonitor extends RunMonitor {
    @Override
    public void run() {
       String line = null;
-      final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-      try {
+      InputStream is = process.getInputStream();
+      InputStreamReader isr = new InputStreamReader(process.getInputStream());
+
+      try (BufferedReader reader = new BufferedReader(isr)) {
          while ((line = reader.readLine()) != null) {
             logger.fine(line);
             for (Pattern pattern : patterns) {
                if (pattern.eval(line)) {
                   result = pattern.isPass();
-                  process.destroyForcibly();
+                  process.destroy();
+                  return;
                };
             }
          }
       }
       catch (IOException e) {
          e.printStackTrace();
+      }
+      finally {
+         try {
+            isr.close();
+            is.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
       }
    }
 
